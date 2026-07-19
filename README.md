@@ -264,15 +264,6 @@ Invoice PDF
 
 ---
 
-## Author
-
-**Shubham Vishwakarma**
-
-Java Backend Developer
-
-GitHub: https://github.com/shubhamvish8108-del
-
-LinkedIn: *(Add your LinkedIn profile)*
 
 ---
 
