@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice Details - Invoice Management System</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f7fa; }
+        .header { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; }
+        .header h1 { font-size: 24px; }
+        .container { max-width: 1000px; margin: 30px auto; padding: 0 20px; }
+        .card { background: white; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); padding: 30px; }
+        .invoice-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 2px solid #e1e5eb; }
+        .invoice-title h2 { color: #1e3c72; font-size: 28px; margin-bottom: 5px; }
+        .invoice-meta { color: #666; }
+        .status-badge { display: inline-block; padding: 8px 20px; border-radius: 25px; font-size: 14px; font-weight: 600; text-transform: uppercase; }
+        .status-full { background: #e8f5e9; color: #2e7d32; }
+        .status-partial { background: #fff3e0; color: #e65100; }
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px; }
+        .info-section { }
+        .info-section h3 { color: #5a6c7d; font-size: 12px; text-transform: uppercase; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid #e1e5eb; }
+        .info-section p { margin-bottom: 5px; color: #333; }
+        .info-section .value { font-weight: 500; color: #1e3c72; }
+        .items-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        .items-table th { background: #1e3c72; color: white; padding: 12px 15px; text-align: left; }
+        .items-table td { padding: 12px 15px; border-bottom: 1px solid #e1e5eb; }
+        .items-table tr:last-child td { border-bottom: none; }
+        .totals-section { display: flex; justify-content: flex-end; margin: 20px 0; }
+        .totals-box { background: #f8f9fa; padding: 20px 30px; border-radius: 8px; min-width: 300px; }
+        .totals-row { display: flex; justify-content: space-between; margin-bottom: 10px; }
+        .totals-row.grand-total { font-size: 20px; font-weight: bold; color: #1e3c72; border-top: 2px solid #1e3c72; padding-top: 10px; margin-top: 10px; }
+        .totals-row.balance { color: #e65100; }
+        .action-buttons { display: flex; gap: 15px; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e1e5eb; }
+        .btn { padding: 12px 25px; border-radius: 5px; font-size: 14px; cursor: pointer; border: none; transition: all 0.3s; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
+        .btn-primary { background: #1e3c72; color: white; }
+        .btn-primary:hover { background: #2a5298; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-success:hover { background: #218838; }
+        .btn-secondary { background: #6c757d; color: white; }
+        .btn-secondary:hover { background: #5a6268; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-danger:hover { background: #c82333; }
+        .alert { padding: 15px 20px; border-radius: 5px; margin-bottom: 20px; }
+        .alert-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .alert-error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .alert-warning { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Invoice Details</h1>
+        <a href="/invoices" class="btn btn-secondary" style="background: rgba(255,255,255,0.2); border: 1px solid white;">
+            &#8592; Back to List
+        </a>
+    </div>
+
+    <div class="container">
+        <!-- Flash Messages -->
+        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+        <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+        <div class="card">
+            <!-- Invoice Header -->
+            <div class="invoice-header">
+                <div class="invoice-title">
+                    <h2 th:text="${invoice.invoiceNo}">INV-0001</h2>
+                    <p class="invoice-meta">
+                        Created: <span th:text="${#temporals.format(invoice.createdAt, 'dd MMMM yyyy, HH:mm')}">01 January 2024, 10:30</span>
+                    </p>
+                </div>
+                <div>
+                    <span class="status-badge" th:classappend="${invoice.isPartialPayment() ? 'status-partial' : 'status-full'}" th:text="${invoice.isPartialPayment() ? 'PARTIAL PAYMENT' : 'FULL PAYMENT'}">FULL PAYMENT</span>
+                </div>
+            </div>
+
+            <!-- Client and Company Info -->
+            <div class="info-grid">
+                <div class="info-section">
+                    <h3>Bill To</h3>
+                    <p class="value" th:text="${invoice.chainName}">Company Name</p>
+                    <p th:if="${invoice.gstNumber}">GST: <span th:text="${invoice.gstNumber}">XXXXXXXXXXXXX</span></p>
+                    <p th:if="${invoice.chainAddress}" th:text="${invoice.chainAddress}">Address</p>
+                    <p th:if="${invoice.chainEmail}">Email: <span th:text="${invoice.chainEmail}">email@company.com</span></p>
+                </div>
+                <div class="info-section">
+                    <h3>Invoice Details</h3>
+                    <p>Date of Payment: <span class="value" th:text="${#temporals.format(invoice.dateOfPayment, 'dd MMM yyyy')}">01 Jan 2024</span></p>
+                    <p>Service Date: <span class="value" th:text="${#temporals.format(invoice.dateOfService, 'dd MMM yyyy')}">15 Jan 2024</span></p>
+                    <p>Delivery: <span th:text="${invoice.deliveryDetails} ?: 'N/A'">Delivery details</span></p>
+                    <p>Send to: <span class="value" th:text="${invoice.emailId}">email@company.com</span></p>
+                </div>
+            </div>
+
+            <!-- Items Table -->
+            <table class="items-table">
+                <thead>
+                    <tr>
+                        <th>Description</th>
+                        <th>Qty</th>
+                        <th>Rate (₹)</th>
+                        <th>Amount (₹)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td th:text="${invoice.serviceDetails}">Service description</td>
+                        <td th:text="${invoice.qty}">100</td>
+                        <td th:text="${#numbers.formatDecimal(invoice.costPerQty, 1, 'COMMA', 2, 'POINT')}">₹500.00</td>
+                        <td th:text="${#numbers.formatDecimal(invoice.amountPayable, 1, 'COMMA', 2, 'POINT')}">₹50,000.00</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Totals -->
+            <div class="totals-section">
+                <div class="totals-box">
+                    <div class="totals-row">
+                        <span>Total Amount:</span>
+                        <span th:text="${'₹' + #numbers.formatDecimal(invoice.amountPayable, 1, 'COMMA', 2, 'POINT')}">₹50,000.00</span>
+                    </div>
+                    <div class="totals-row" th:if="${invoice.isPartialPayment()}">
+                        <span>Amount Paid:</span>
+                        <span th:text="${'₹' + #numbers.formatDecimal(invoice.getAmountPaid(), 1, 'COMMA', 2, 'POINT')}">₹30,000.00</span>
+                    </div>
+                    <div class="totals-row" th:if="${invoice.isPartialPayment()}" style="color: #e65100;">
+                        <span>Balance Due:</span>
+                        <span th:text="${'₹' + #numbers.formatDecimal(invoice.balance, 1, 'COMMA', 2, 'POINT')}">₹20,000.00</span>
+                    </div>
+                    <div class="totals-row grand-total" th:if="${!invoice.isPartialPayment()}">
+                        <span>PAID IN FULL</span>
+                        <span>&#10004;</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <a th:href="@{/invoices/download/{id}(id=${invoice.id})}" class="btn btn-success">
+                    <span>&#128196;</span> Download PDF
+                </a>
+                <a th:href="@{/invoices/preview/{id}(id=${invoice.id})}" class="btn btn-primary" target="_blank">
+                    <span>&#128269;</span> Preview PDF
+                </a>
+                <form th:action="@{/invoices/send-email/{id}(id=${invoice.id})}" method="post" style="display: inline;">
+                    <button type="submit" class="btn btn-primary">
+                        <span>&#9993;</span> Send Email
+                    </button>
+                </form>
+                <a th:href="@{/invoices/edit/{id}(id=${invoice.id})}" class="btn btn-secondary">
+                    <span>&#9998;</span> Edit Email
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Invoice - Invoice Management System</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f7fa; }
+        .header { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; padding: 20px 40px; }
+        .header h1 { font-size: 24px; }
+        .container { max-width: 600px; margin: 30px auto; padding: 0 20px; }
+        .card { background: white; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); padding: 30px; }
+        .card h2 { color: #1e3c72; margin-bottom: 20px; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; color: #5a6c7d; font-weight: 500; margin-bottom: 8px; }
+        .form-group input, .form-group textarea { width: 100%; padding: 12px 15px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px; }
+        .readonly-field { background: #f0f0f0; padding: 12px 15px; border: 1px solid #ddd; border-radius: 5px; color: #666; }
+        .info-box { background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin-bottom: 20px; border-radius: 0 5px 5px 0; }
+        .btn-group { display: flex; gap: 15px; margin-top: 30px; }
+        .btn { padding: 12px 30px; border-radius: 5px; font-size: 14px; cursor: pointer; border: none; transition: all 0.3s; text-decoration: none; }
+        .btn-primary { background: #1e3c72; color: white; }
+        .btn-primary:hover { background: #2a5298; }
+        .btn-secondary { background: #6c757d; color: white; }
+        .btn-secondary:hover { background: #5a6268; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Edit Invoice</h1>
+    </div>
+
+    <div class="container">
+        <div class="card">
+            <h2>Update Invoice Email</h2>
+
+            <div class="info-box">
+                <strong>&#9432;</strong> Only the Email ID field can be edited. To change other details,
+                please update the estimate and generate a new invoice.
+            </div>
+
+            <form th:action="@{/invoices/update/{id}(id=${invoice.id})}" method="post">
+                <!-- Invoice Info (Read-only) -->
+                <div class="form-group">
+                    <label>Invoice Number</label>
+                    <div class="readonly-field" th:text="${invoice.invoiceNo}">INV-0001</div>
+                </div>
+
+                <div class="form-group">
+                    <label>Company</label>
+                    <div class="readonly-field" th:text="${invoice.chainName}">Company Name</div>
+                </div>
+
+                <div class="form-group">
+                    <label>Amount</label>
+                    <div class="readonly-field" th:text="${'₹' + #numbers.formatDecimal(invoice.amountPayable, 1, 'COMMA', 2, 'POINT')}">₹50,000.00</div>
+                </div>
+
+                <!-- Editable Field -->
+                <div class="form-group">
+                    <label for="emailId">Email Address *</label>
+                    <input type="email" id="emailId" name="emailId" required th:value="${invoice.emailId}" placeholder="client@company.com" />
+                </div>
+
+                <div class="form-group">
+                    <label for="deliveryDetails">Delivery Details</label>
+                    <textarea id="deliveryDetails" name="deliveryDetails" th:text="${invoice.deliveryDetails}" placeholder="Delivery address"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="dateOfService">Service Date</label>
+                    <input type="date" id="dateOfService" name="dateOfService" th:value="${invoice.dateOfService}" />
+                </div>
+
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-primary">Update Invoice</button>
+                    <a th:href="@{/invoices/view/{id}(id=${invoice.id})}" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

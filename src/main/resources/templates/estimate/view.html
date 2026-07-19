@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estimate Details - Invoice Management System</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f7fa; }
+        .header { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; }
+        .header h1 { font-size: 24px; }
+        .container { max-width: 800px; margin: 30px auto; padding: 0 20px; }
+        .card { background: white; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); padding: 30px; }
+        .estimate-header { margin-bottom: 30px; padding-bottom: 20px; border-bottom: 2px solid #e1e5eb; }
+        .estimate-header h2 { color: #1e3c72; font-size: 24px; margin-bottom: 10px; }
+        .status-badge { display: inline-block; padding: 5px 15px; border-radius: 20px; font-size: 12px; font-weight: 500; }
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-approved { background: #d4edda; color: #155724; }
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+        .info-item { }
+        .info-item label { color: #8a99a5; font-size: 12px; text-transform: uppercase; }
+        .info-item p { color: #333; font-weight: 500; margin-top: 5px; }
+        .amount-box { background: #f0f7ff; border-left: 4px solid #1e3c72; padding: 20px; border-radius: 0 8px 8px 0; margin: 20px 0; }
+        .amount-box h3 { color: #1e3c72; font-size: 14px; margin-bottom: 10px; }
+        .amount-box .amount { font-size: 28px; font-weight: bold; color: #1e3c72; }
+        .invoice-box { background: #e8f5e9; border: 1px solid #c8e6c9; padding: 20px; border-radius: 8px; margin-top: 20px; }
+        .invoice-box h3 { color: #2e7d32; margin-bottom: 10px; }
+        .btn-group { display: flex; gap: 15px; margin-top: 30px; }
+        .btn { padding: 12px 25px; border-radius: 5px; font-size: 14px; cursor: pointer; border: none; transition: all 0.3s; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
+        .btn-primary { background: #1e3c72; color: white; }
+        .btn-primary:hover { background: #2a5298; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-success:hover { background: #218838; }
+        .btn-secondary { background: #6c757d; color: white; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Estimate Details</h1>
+        <a href="/estimates" class="btn btn-secondary" style="background: rgba(255,255,255,0.2); border: 1px solid white;">Back</a>
+    </div>
+
+    <div class="container">
+        <div class="card">
+            <div class="estimate-header">
+                <h2 th:text="${estimate.estimateNo}">EST-0001</h2>
+                <span class="status-badge" th:classappend="${estimate.status == 'APPROVED' ? 'status-approved' : 'status-pending'}" th:text="${estimate.status}">PENDING</span>
+            </div>
+
+            <div class="info-grid">
+                <div class="info-item">
+                    <label>Company</label>
+                    <p th:text="${estimate.chain?.chainName}">Company Name</p>
+                </div>
+                <div class="info-item">
+                    <label>GST Number</label>
+                    <p th:text="${estimate.chain?.gstNumber}">XXXXXXXXXXXXX</p>
+                </div>
+                <div class="info-item">
+                    <label>Created Date</label>
+                    <p th:text="${#temporals.format(estimate.createdAt, 'dd MMM yyyy')}">01 Jan 2024</p>
+                </div>
+                <div class="info-item">
+                    <label>Last Updated</label>
+                    <p th:text="${#temporals.format(estimate.updatedAt, 'dd MMM yyyy')}">01 Jan 2024</p>
+                </div>
+            </div>
+
+            <div class="info-item">
+                <label>Service Details</label>
+                <p th:text="${estimate.serviceDetails}">Service description</p>
+            </div>
+
+            <div class="info-grid" style="margin-top: 20px;">
+                <div class="info-item">
+                    <label>Quantity</label>
+                    <p th:text="${estimate.qty}">100</p>
+                </div>
+                <div class="info-item">
+                    <label>Cost per Quantity</label>
+                    <p th:text="${'₹' + #numbers.formatDecimal(estimate.costPerQty, 1, 'COMMA', 2, 'POINT')}">₹500.00</p>
+                </div>
+            </div>
+
+            <div class="amount-box">
+                <h3>Total Amount</h3>
+                <div class="amount" th:text="${'₹' + #numbers.formatDecimal(estimate.totalAmount, 1, 'COMMA', 2, 'POINT')}">₹50,000.00</div>
+            </div>
+
+            <!-- Invoice Status -->
+            <div th:if="${hasInvoice}" class="invoice-box">
+                <h3>&#10004; Invoice Generated</h3>
+                <p>Invoice No: <strong th:text="${invoice?.invoiceNo}">INV-0001</strong></p>
+                <div class="btn-group">
+                    <a th:href="@{/invoices/view/{id}(id=${invoice.id})}" class="btn btn-primary">View Invoice</a>
+                </div>
+            </div>
+
+            <div th:unless="${hasInvoice}">
+                <div th:if="${estimate.status == 'APPROVED'}" class="btn-group">
+                    <a th:href="@{/invoices/create/{id}(id=${estimate.id})}" class="btn btn-success">
+                        &#43; Generate Invoice
+                    </a>
+                </div>
+                <div th:unless="${estimate.status == 'APPROVED'}" class="btn-group">
+                    <form th:action="@{/estimates/approve/{id}(id=${estimate.id})}" method="post">
+                        <button type="submit" class="btn btn-success">Approve Estimate</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
