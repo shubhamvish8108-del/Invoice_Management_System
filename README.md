@@ -223,35 +223,6 @@ Each PDF contains:
 
 ---
 
-## Email Support
-
-The application can send invoices directly to customers through Gmail SMTP.
-
-Update the following properties before using email:
-
-```properties
-spring.mail.username=your_email@gmail.com
-spring.mail.password=your_app_password
-```
-
----
-
-## Screenshots
-
-You can add screenshots here.
-
-```
-Home Dashboard
-
-Estimate List
-
-Invoice Details
-
-Invoice PDF
-```
-
----
-
 ## Future Improvements
 
 - User Authentication
